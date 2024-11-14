@@ -49,18 +49,28 @@ class _HtmlToPdfScreenState extends State<HtmlToPdfScreen> {
             style: TextStyle(color: Colors.white),
           ),
           actions: <Widget>[
-            IconButton(
-              icon: const Icon(Icons.comment),
-              tooltip: 'Comment Icon',
-              color: Colors.white,
-              onPressed: () {},
-            ), //IconButton
-            IconButton(
-              icon: const Icon(Icons.settings),
-              tooltip: 'Setting Icon',
-              color: Colors.white,
-              onPressed: () {},
-            ), //IconButton
+            Padding(
+              padding: const EdgeInsets.only(right: 12),
+              child: IconButton(
+                onPressed: () async {
+                  final pdfBytes = await generateExampleDocument();
+                  if (pdfBytes != null) {
+                    await Printing.layoutPdf(
+                      onLayout: (PdfPageFormat format) async => pdfBytes,
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Failed to generate PDF')),
+                    );
+                  }
+                },
+                icon: const Icon(
+                  Icons.remove_red_eye_sharp,
+                  color: Colors.white,
+                  size: 28,
+                ),
+              ),
+            ), //IconButton//IconButton
           ], //<Widget>[]
           backgroundColor: Colors.blueAccent[400],
           elevation: 50.0,
@@ -72,111 +82,73 @@ class _HtmlToPdfScreenState extends State<HtmlToPdfScreen> {
           ),
         ),
         body: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
           color: AppColors.kAppBarColorMobile.withOpacity(.5),
-          child: Column(
-            children: [
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: HtmlEditor(
-                    controller: controller,
-                    htmlEditorOptions: HtmlEditorOptions(
-                      hint: "Type your content here...",
-                      shouldEnsureVisible: true,
-                      autoAdjustHeight: true,
-                      initialText: "<p>Welcome to the editor!</p>", // Optional initial text
+          child: Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: HtmlEditor(
+                controller: controller,
+                htmlEditorOptions: HtmlEditorOptions(
+                  hint: "Type your content here...",
+                  shouldEnsureVisible: true,
+                  autoAdjustHeight: true,
+                  initialText: "<p>Welcome to the editor!</p>", // Optional initial text
+                ),
+                htmlToolbarOptions: HtmlToolbarOptions(
+                  toolbarPosition: ToolbarPosition.belowEditor, // Toolbar above editor
+                  defaultToolbarButtons: [
+                    FontButtons(
+                      bold: true,
+                      italic: true,
+                      underline: true,
                     ),
-                    htmlToolbarOptions: HtmlToolbarOptions(
-                      toolbarPosition: ToolbarPosition.aboveEditor, // Toolbar above editor
-                      defaultToolbarButtons: [
-                        FontButtons(
-                          bold: true,
-                          italic: true,
-                          underline: true,
-                        ),
-                        ColorButtons(),
-                        ListButtons(),
-                        ParagraphButtons(
-                          alignCenter: true,
-                          alignJustify: true,
-                          alignLeft: true,
-                          alignRight: true,
-                          lineHeight: true,
-                        ),
-                        InsertButtons(
-                          picture: true,
-                          link: true,
-                        ),
-                      ],
-                      customToolbarButtons: [
-                        IconButton(
-                          icon: const Icon(Icons.save),
-                          tooltip: 'Save',
-                          onPressed: () async {
-                            // Example: Get editor content
-                            String? content = await controller.getText();
-                            print(content); // Save or process content here
-                          },
-                        ),
-                      ],
+                    ColorButtons(),
+                    ListButtons(),
+                    ParagraphButtons(
+                      alignCenter: true,
+                      alignJustify: true,
+                      alignLeft: true,
+                      alignRight: true,
+                      lineHeight: true,
                     ),
-                    otherOptions: OtherOptions(
-                      height: 842,
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
+                    InsertButtons(
+                      picture: true,
+                      link: true,
                     ),
-                    callbacks: Callbacks(
-                      onChangeContent: (String? content) {
-                        print("Content changed: $content");
-                      },
-                      onFocus: () {
-                        print("Editor focused");
-                      },
-                      onBlur: () {
-                        print("Editor lost focus");
+                  ],
+                  customToolbarButtons: [
+                    IconButton(
+                      icon: const Icon(Icons.save),
+                      tooltip: 'Save',
+                      onPressed: () async {
+                        // Example: Get editor content
+                        String? content = await controller.getText();
+                        print(content); // Save or process content here
                       },
                     ),
+                  ],
+                ),
+                otherOptions: OtherOptions(
+                  height: 842,
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey),
+                    borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-              ),
-              Center(
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: 20, top: 20),
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.kSegmentButton,
-                        padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 5),
-                        textStyle: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                    onPressed: () async {
-                      final pdfBytes = await generateExampleDocument();
-                      if (pdfBytes != null) {
-                        await Printing.layoutPdf(
-                          onLayout: (PdfPageFormat format) async => pdfBytes,
-                        );
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Failed to generate PDF')),
-                        );
-                      }
-                    },
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.remove_red_eye, color: AppColors.kWhiteColor),
-                        SizedBox(width: 10),
-                        Text(
-                          'Preview PDF',
-                          style: TextStyle(color: AppColors.kWhiteColor, fontWeight: FontWeight.normal),
-                        ),
-                      ],
-                    ),
-                  ),
+                callbacks: Callbacks(
+                  onChangeContent: (String? content) {
+                    print("Content changed: $content");
+                  },
+                  onFocus: () {
+                    print("Editor focused");
+                  },
+                  onBlur: () {
+                    print("Editor lost focus");
+                  },
                 ),
               ),
-            ],
+            ),
           ),
         ));
   }
