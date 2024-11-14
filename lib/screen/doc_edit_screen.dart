@@ -1,8 +1,9 @@
 import 'package:docx/utils/colors.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_html_to_pdf/flutter_html_to_pdf.dart';
+//import 'package:flutter_html_to_pdf/flutter_html_to_pdf.dart';
 import 'package:flutter_quill/flutter_quill.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:flutter_quill_to_pdf/converter/configurator/converter_option/pdf_page_format.dart';
+import 'package:flutter_quill_to_pdf/converter/pdf_converter.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
@@ -17,113 +18,60 @@ class DocEditScreen extends StatefulWidget {
 class _DocEditScreenState extends State<DocEditScreen> {
   final QuillController _controller = QuillController.basic();
 
+  PDFPageFormat? pdfFormat = PDFPageFormat(
+      marginTop: 12,
+      marginBottom: 12,
+      marginLeft: 12,
+      marginRight: 12,
+      height: double.infinity,
+      width: double.infinity);
+
+  final PDFPageFormat pageFormat = PDFPageFormat.all(width: double.infinity, height: double.infinity, margin: 12);
+
+  final PdfPageFormat pdfPageFormat = PdfPageFormat(PDFPageFormat.a4.width, PDFPageFormat.a4.height, marginAll: 0);
+
+  PDFConverter pdfConverter = PDFConverter(
+      backMatterDelta: null, // You can provide optional back matter Delta here
+      frontMatterDelta: null, // You can provide optional front matter Delta here
+      document: QuillController.basic().document.toDelta(),
+      fallbacks: [],
+      pageFormat: PDFPageFormat.a4);
+
   Future<void> exportQuillToPdf(QuillController controller) async {
-    // Create a new PDF document
-    final pdf = pw.Document();
+    //final pdfData = await pdfConverter.convert(controller.document);
 
-    // Get the Quill document content as delta format
-    final delta = controller.document.toDelta();
+    final pw.Widget? pwWidget = await pdfConverter.generateWidget(
+      maxWidth: double.infinity,
+      maxHeight: double.infinity,
+    );
 
-    // Define a function to parse and style each segment
-    List<pw.Widget> buildStyledText(List<dynamic> operations) {
-      List<pw.Widget> pdfWidgets = [];
+    final pw.Document? document = await pdfConverter.createDocument();
+    final content = controller.document.toDelta();
 
-      for (var op in operations) {
-        // Each `op` is a delta operation in the Quill document
-        final text = op['insert'];
-        final style = op['attributes'] ?? {};
-
-        // Set base style
-        pw.TextStyle textStyle = pw.TextStyle(fontSize: 14);
-
-        // Apply style attributes
-        if (style['bold'] == true) {
-          textStyle = textStyle.copyWith(fontWeight: pw.FontWeight.bold);
-        }
-        if (style['italic'] == true) {
-          textStyle = textStyle.copyWith(fontStyle: pw.FontStyle.italic);
-        }
-        if (style['underline'] == true) {
-          textStyle = textStyle.copyWith(decoration: pw.TextDecoration.underline);
-        }
-        if (style['header'] != null) {
-          final headerSize = style['header'] == 1 ? 24 : 20;
-          textStyle = textStyle.copyWith(fontSize: headerSize.toDouble(), fontWeight: pw.FontWeight.bold);
-        }
-
-        pdfWidgets.add(pw.Text(text, style: textStyle));
-      }
-
-      return pdfWidgets;
-    }
-
-    // Build the PDF page
-    pdf.addPage(
+// Add a page to the document with custom layout
+    document?.addPage(
       pw.Page(
+        pageFormat: pdfPageFormat,
         build: (pw.Context context) {
-          return pw.Column(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
-            children: buildStyledText(delta.toJson()),
-          );
+          return pw.Stack(children: [
+            // Create a full-page blue background
+            pw.Expanded(
+              child: pw.Rectangle(
+                fillColor: PdfColor.fromHex("#5AACFE"),
+              ),
+            ),
+            // Position the editor content in the top-left corner
+            pw.Positioned(top: PdfPageFormat.a4.marginTop, left: PdfPageFormat.a4.marginLeft, child: pwWidget!),
+            // Position a copy of the editor content in the bottom-right corner
+            pw.Positioned(bottom: PdfPageFormat.a4.marginBottom, right: PdfPageFormat.a4.marginRight, child: pwWidget!),
+          ]);
         },
       ),
     );
 
-    // Preview the PDF using the printing package
     await Printing.layoutPdf(
-      onLayout: (PdfPageFormat format) async => pdf.save(),
+      onLayout: (PdfPageFormat format) async => document!.save(),
     );
-  }
-
-  Future<String> deltaToHtml(QuillController controller) async {
-    final delta = controller.document.toDelta();
-    String htmlContent = '';
-
-    // Iterate through delta operations and convert to HTML
-    for (var op in delta.toList()) {
-      if (op.isInsert) {
-        final insertText = op.insert.toString();
-
-        // Handle formatting based on attributes
-        if (op.attributes != null) {
-          final attributes = op.attributes!;
-          if (attributes.containsKey('bold')) {
-            htmlContent += '<b>$insertText</b>';
-          } else if (attributes.containsKey('italic')) {
-            htmlContent += '<i>$insertText</i>';
-          } else if (attributes.containsKey('underline')) {
-            htmlContent += '<u>$insertText</u>';
-          } else if (attributes.containsKey('color')) {
-            final color = attributes['color'];
-            htmlContent += '<span style="color:$color;">$insertText</span>';
-          } else {
-            htmlContent += insertText; // Plain text
-          }
-        } else {
-          htmlContent += insertText; // Plain text
-        }
-      }
-    }
-
-    return htmlContent;
-  }
-
-  Future<void> exportQuillToHtmlPdf(QuillController controller) async {
-    // Convert Quill delta to JSON
-    final deltaJson = controller.document.toDelta().toJson();
-
-    // Convert JSON to HTML using vsc_quill_delta_to_html
-    final htmlContent = deltaToHtml(deltaJson);
-
-    // Generate the PDF from HTML
-    final outputDir = await getTemporaryDirectory();
-    final outputFile = await FlutterHtmlToPdf.convertFromHtmlContent(
-      htmlContent,
-      outputDir.path,
-      "styled_quill_document.pdf",
-    );
-
-    print("PDF generated at: ${outputFile.path}");
   }
 
   @override

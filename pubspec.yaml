@@ -22,8 +22,16 @@ dependencies:
   path_provider: ^2.1.5
   printing: ^5.13.4
   vsc_quill_delta_to_html: ^1.0.5
-  flutter_html_to_pdf: ^0.7.0
-  quill_delta_to_html: ^1.0.0
+  #flutter_html_to_pdf: ^0.7.0
+  flutter_quill_to_pdf: ^2.2.5
+  animated_text_kit: ^4.2.2
+  file_picker: ^8.1.4
+  google_fonts: ^6.2.1
+  html_editor_enhanced: ^2.6.0
+  htmltopdfwidgets: ^1.0.4
+  html_to_pdf: ^0.8.1
+
+
 
 
 
@@ -31,10 +39,13 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
-  flutter_lints: ^5.0.0
+  #flutter_lints: ^5.0.0
+  #lints: ^4.0.0
 
 
 flutter:
 
   uses-material-design: true
+
+
 
