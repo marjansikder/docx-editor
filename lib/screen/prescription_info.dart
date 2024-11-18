@@ -98,6 +98,7 @@ class _PrescriptionInfoScreenState extends State<PrescriptionInfoScreen> {
                     hint: "Type your content below...",
                     autoAdjustHeight: true,
                     initialText: currentContent,
+                    shouldEnsureVisible: true,
                   ),
                   htmlToolbarOptions: HtmlToolbarOptions(
                     toolbarPosition: ToolbarPosition.belowEditor,
@@ -215,7 +216,11 @@ class _PrescriptionInfoScreenState extends State<PrescriptionInfoScreen> {
                     Flexible(
                       child: Container(
                         width: width,
-                        decoration: BoxDecoration(border: Border.all(width: 1, color: Colors.black12)),
+                        decoration: BoxDecoration(
+                            border: Border(
+                          top: BorderSide(color: Colors.black45, width: 1.5), // Top border
+                          //right: BorderSide(color: Colors.black45, width: .5),
+                        )),
                         child: TextButton(
                           onPressed: () => _showEdit(context, 2),
                           child: box2Content.isEmpty ? Text('Add Information') : HtmlWidget(box2Content),
@@ -223,10 +228,15 @@ class _PrescriptionInfoScreenState extends State<PrescriptionInfoScreen> {
                       ),
                     ),
                     SizedBox(height: 5),
+                    Divider(thickness: 2),
                     Flexible(
                       child: Container(
                         width: width,
-                        decoration: BoxDecoration(border: Border.all(width: 1, color: Colors.black12)),
+                        decoration: BoxDecoration(
+                            border: Border(
+                          top: BorderSide(color: Colors.black45, width: 1.5), // Top border
+                          //left: BorderSide(color: Colors.black45, width: .5),
+                        )),
                         child: TextButton(
                           onPressed: () => _showEdit(context, 3),
                           child: box3Content.isEmpty ? Text('Add Information') : HtmlWidget(box3Content),
