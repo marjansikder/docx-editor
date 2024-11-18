@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:docx/screen/prescription_format.dart';
 import 'package:docx/utils/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -84,69 +85,68 @@ class _HtmlToPdfScreenState extends State<HtmlToPdfScreen> {
         body: Container(
           padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
           color: AppColors.kAppBarColorMobile.withOpacity(.5),
-          child: Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: HtmlEditor(
-                controller: controller,
-                htmlEditorOptions: HtmlEditorOptions(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: HtmlEditor(
+              controller: controller,
+              htmlEditorOptions: HtmlEditorOptions(
                   hint: "Type your content here...",
                   shouldEnsureVisible: true,
                   autoAdjustHeight: true,
-                  initialText: "<p>Welcome to the editor!</p>", // Optional initial text
-                ),
-                htmlToolbarOptions: HtmlToolbarOptions(
-                  toolbarPosition: ToolbarPosition.belowEditor, // Toolbar above editor
-                  defaultToolbarButtons: [
-                    FontButtons(
-                      bold: true,
-                      italic: true,
-                      underline: true,
-                    ),
-                    ColorButtons(),
-                    ListButtons(),
-                    ParagraphButtons(
-                      alignCenter: true,
-                      alignJustify: true,
-                      alignLeft: true,
-                      alignRight: true,
-                      lineHeight: true,
-                    ),
-                    InsertButtons(
-                      picture: true,
-                      link: true,
-                    ),
-                  ],
-                  customToolbarButtons: [
-                    IconButton(
-                      icon: const Icon(Icons.save),
-                      tooltip: 'Save',
-                      onPressed: () async {
-                        // Example: Get editor content
-                        String? content = await controller.getText();
-                        print(content); // Save or process content here
-                      },
-                    ),
-                  ],
-                ),
-                otherOptions: OtherOptions(
-                  height: 842,
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey),
-                    borderRadius: BorderRadius.circular(8),
+                  initialText: prescriptionFormat
+                  //initialText: "<p>Welcome to the editor!</p>", // Optional initial text
                   ),
+              htmlToolbarOptions: HtmlToolbarOptions(
+                toolbarPosition: ToolbarPosition.belowEditor, // Toolbar above editor
+                defaultToolbarButtons: [
+                  FontButtons(
+                    bold: true,
+                    italic: true,
+                    underline: true,
+                  ),
+                  ColorButtons(),
+                  ListButtons(),
+                  ParagraphButtons(
+                    alignCenter: true,
+                    alignJustify: true,
+                    alignLeft: true,
+                    alignRight: true,
+                    lineHeight: true,
+                  ),
+                  InsertButtons(
+                    picture: true,
+                    link: true,
+                  ),
+                ],
+                customToolbarButtons: [
+                  IconButton(
+                    icon: const Icon(Icons.save),
+                    tooltip: 'Save',
+                    onPressed: () async {
+                      // Example: Get editor content
+                      String? content = await controller.getText();
+                      print(content); // Save or process content here
+                    },
+                  ),
+                ],
+              ),
+              otherOptions: OtherOptions(
+                height: 842,
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                callbacks: Callbacks(
-                  onChangeContent: (String? content) {
-                    print("Content changed: $content");
-                  },
-                  onFocus: () {
-                    print("Editor focused");
-                  },
-                  onBlur: () {
-                    print("Editor lost focus");
-                  },
-                ),
+              ),
+              callbacks: Callbacks(
+                onChangeContent: (String? content) {
+                  print("Content changed: $content");
+                },
+                onFocus: () {
+                  print("Editor focused");
+                },
+                onBlur: () {
+                  print("Editor lost focus");
+                },
               ),
             ),
           ),

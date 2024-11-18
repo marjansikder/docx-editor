@@ -1,4 +1,4 @@
-import 'package:docx/screen/html_to_pdf.dart';
+import 'package:docx/screen/prescription_info.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: HtmlToPdfScreen(),
+      home: PrescriptionInfoScreen(),
     );
   }
 }

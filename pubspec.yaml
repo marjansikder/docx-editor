@@ -30,6 +30,8 @@ dependencies:
   html_editor_enhanced: ^2.6.0
   htmltopdfwidgets: ^1.0.4
   html_to_pdf: ^0.8.1
+  flutter_widget_from_html: ^0.15.3
+  uuid: ^4.5.1
 
 
 
