@@ -18,18 +18,17 @@ class CustomTextWidget extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Title Text
         Text(
           title,
-          style: TextStyle(fontFamily: 'Noto Sans', fontSize: 18, fontWeight: FontWeight.w500, color: Colors.black),
+          style: TextStyle(fontFamily: 'Jost', fontSize: 16, fontWeight: FontWeight.w600, color: Colors.black),
         ),
         Text(
           subtitle,
-          style: TextStyle(fontFamily: 'Noto Sans', fontSize: 16, fontWeight: FontWeight.w400, color: Colors.black87),
+          style: TextStyle(fontFamily: 'Jost', fontSize: 15, fontWeight: FontWeight.w400, color: Colors.black87),
         ),
         Text(
           description,
-          style: TextStyle(fontFamily: 'Noto Sans', fontSize: 12, fontWeight: FontWeight.w400, color: Colors.black54),
+          style: TextStyle(fontFamily: 'Jost', fontSize: 12, fontWeight: FontWeight.w400, color: Colors.black54),
         ),
       ],
     );
