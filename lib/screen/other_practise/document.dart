@@ -1,14 +1,13 @@
 import 'dart:io';
 
 import 'package:animated_text_kit/animated_text_kit.dart';
+import 'package:docx/screen/other_practise/fort_loader.dart';
+import 'package:docx/utils/colors.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_quill_to_pdf/flutter_quill_to_pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
-
-import '../utils/colors.dart';
-import 'fort_loader.dart';
 
 class DocumentScreen extends StatefulWidget {
   const DocumentScreen({super.key});

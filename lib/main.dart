@@ -1,4 +1,4 @@
-import 'package:docx/screen/prescription_info.dart';
+import 'package:docx/screen/prescription/prescription_info.dart';
 import 'package:flutter/material.dart';
 
 void main() {

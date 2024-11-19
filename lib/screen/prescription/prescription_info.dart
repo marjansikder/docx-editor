@@ -20,9 +20,9 @@ class PrescriptionInfoScreen extends StatefulWidget {
 class _PrescriptionInfoScreenState extends State<PrescriptionInfoScreen> {
   HtmlEditorController htmlEditorController = HtmlEditorController();
 
-  String box1Content = "";
-  String box2Content = "";
-  String box3Content = "";
+  String patientInfo = "";
+  String doctorInfo = "";
+  String otherDetailsInfo = "";
 
   String getHtmlContentFull() {
     return """
@@ -97,11 +97,11 @@ class _PrescriptionInfoScreenState extends State<PrescriptionInfoScreen> {
         }
 
         .container {
-            margin: 20px;
+            height: auto;
             padding: 10px;
             background-color: #fff;
             border: 1px solid #ddd;
-            border-radius: 10px;
+            border-radius: 5px;
         }
         
         .details-container {
@@ -131,7 +131,7 @@ class _PrescriptionInfoScreenState extends State<PrescriptionInfoScreen> {
 
         .details-box {
             flex: 1;
-          
+            justify-content: First;
             margin: 0 10px;
             padding: 10px;
           
@@ -143,11 +143,13 @@ class _PrescriptionInfoScreenState extends State<PrescriptionInfoScreen> {
         
         .footer-box {
             padding: 15px;
+            
             background-color: #fdfdfd;
         }
 
         .middle-box {
             padding: 10px;
+             margin: 0 0 0 10px;
             border-radius: 8px;
             text-align: left;
         }
@@ -166,6 +168,28 @@ class _PrescriptionInfoScreenState extends State<PrescriptionInfoScreen> {
             flex: 1;
             margin: 0 5px;
         }
+        
+        .footer-center {
+           
+            display: flex;
+            justify-content:center;
+            padding: 10px;
+            border-top: 2px solid #ddd;
+            margin-top: 20px 20px;
+            color: #333;
+            background-color: #fafafa;
+        }
+        
+        .doctor-container {
+           
+            display: flex;
+            justify-content:center;
+            padding: 10px;
+            border-top: 2px solid #ddd;
+            margin-top: 20px 20px;
+            color: #333;
+            background-color: #fafafa;
+        }
 
         .editable {
             font-weight: bold;
@@ -178,18 +202,18 @@ class _PrescriptionInfoScreenState extends State<PrescriptionInfoScreen> {
         <div class="row">
             <!-- First Left Box -->
             <div class="details-box">
-              <p>${box3Content}</p>
+              <p>${otherDetailsInfo}</p>
             </div>
             <div class="middle-border"></div>
             <!-- Second Right Box -->
             <div class="details-box">
-                <p>${box2Content}</p>
+                <p>${doctorInfo}</p>
             </div>
         </div>
        
         <div class="divider"></div>
          <div class="middle-box">
-            <p>${box1Content}</p>
+            <p>${patientInfo}</p>
         </div>
          <div class="divider"></div>
             <div class="rx-container">
@@ -234,7 +258,12 @@ class _PrescriptionInfoScreenState extends State<PrescriptionInfoScreen> {
                 <div class="content">Remarks</div>
             </div>
         </div>
+        
     </div>
+    <div class="footer-center">
+            <p>ডাক্তারের পরামর্শ ব্যতিত কোন ঔষধ পরিবর্তন যোগ্য নয়</p>
+        </div>
+      
     </div>
 </html>
   """;
@@ -263,11 +292,11 @@ class _PrescriptionInfoScreenState extends State<PrescriptionInfoScreen> {
 
     // Determine the content to load based on the box number
     if (boxNumber == 1) {
-      currentContent = box1Content;
+      currentContent = patientInfo;
     } else if (boxNumber == 2) {
-      currentContent = box2Content;
+      currentContent = doctorInfo;
     } else if (boxNumber == 3) {
-      currentContent = box3Content;
+      currentContent = otherDetailsInfo;
     }
 
     htmlEditorController.setText(currentContent);
@@ -334,11 +363,11 @@ class _PrescriptionInfoScreenState extends State<PrescriptionInfoScreen> {
                     if (content.isNotEmpty) {
                       setState(() {
                         if (boxNumber == 1) {
-                          box1Content = content;
+                          patientInfo = content;
                         } else if (boxNumber == 2) {
-                          box2Content = content;
+                          doctorInfo = content;
                         } else if (boxNumber == 3) {
-                          box3Content = content;
+                          otherDetailsInfo = content;
                         }
                       });
                       Navigator.pop(context); // Close the bottom sheet
@@ -379,7 +408,7 @@ class _PrescriptionInfoScreenState extends State<PrescriptionInfoScreen> {
         actions: [
           IconButton(
               onPressed: () async {
-                final pdfBytes = await _getPdf(box1Content + box2Content + box3Content);
+                final pdfBytes = await _getPdf(patientInfo + doctorInfo + otherDetailsInfo);
                 if (pdfBytes != null) {
                   await Printing.layoutPdf(
                     onLayout: (PdfPageFormat format) async => pdfBytes,
@@ -418,13 +447,13 @@ class _PrescriptionInfoScreenState extends State<PrescriptionInfoScreen> {
                         //height: height * 0.3,
                         decoration: BoxDecoration(
                             border: Border(
-                          top: BorderSide(color: Colors.black45, width: 1.5), // Top border
-                          right: BorderSide(color: Colors.black45, width: .5),
-                          bottom: BorderSide(color: Colors.black45, width: .5),
+                          top: BorderSide(color: Colors.black45, width: 1), // Top border
+                          right: BorderSide(color: Colors.black45, width: 1),
+                          //bottom: BorderSide(color: Colors.black45, width: .5),
                         )),
                         child: TextButton(
                           onPressed: () => _showEdit(context, 2),
-                          child: box2Content.isEmpty ? Text('Add Information') : HtmlWidget(box2Content),
+                          child: doctorInfo.isEmpty ? Text('+ Add Doctor Information') : HtmlWidget(doctorInfo),
                         ),
                       ),
                     ),
@@ -436,26 +465,28 @@ class _PrescriptionInfoScreenState extends State<PrescriptionInfoScreen> {
                         //height: height * 0.3,
                         decoration: BoxDecoration(
                             border: Border(
-                          top: BorderSide(color: Colors.black45, width: 1.5), // Top border
-                          left: BorderSide(color: Colors.black45, width: .5),
-                          bottom: BorderSide(color: Colors.black45, width: .5),
+                          top: BorderSide(color: Colors.black45, width: 1), // Top border
+                          left: BorderSide(color: Colors.black45, width: 1),
+                          //bottom: BorderSide(color: Colors.black45, width: .5),
                         )),
                         child: TextButton(
                           onPressed: () => _showEdit(context, 3),
-                          child: box3Content.isEmpty ? Text('Add Information') : HtmlWidget(box3Content),
+                          child:
+                              otherDetailsInfo.isEmpty ? Text('+ Add Other Information') : HtmlWidget(otherDetailsInfo),
                         ),
                       ),
                     ),
                   ],
                 ),
                 SizedBox(height: 5),
+                Divider(thickness: 2),
                 Container(
                   width: width,
                   height: height * 0.1,
                   decoration: BoxDecoration(border: Border.all(width: 1, color: Colors.black12)),
                   child: TextButton(
                     onPressed: () => _showEdit(context, 1),
-                    child: box1Content.isEmpty ? Text('Add Information') : HtmlWidget(box1Content),
+                    child: patientInfo.isEmpty ? Text('+ Add Patient Information') : HtmlWidget(patientInfo),
                   ),
                 ),
                 SizedBox(height: 5),

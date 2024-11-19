@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:docx/screen/prescription_format.dart';
+import 'package:docx/screen/other_practise/prescription_format.dart';
 import 'package:docx/utils/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
