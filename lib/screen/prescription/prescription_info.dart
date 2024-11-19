@@ -300,6 +300,7 @@ class _PrescriptionInfoScreenState extends State<PrescriptionInfoScreen> {
     }
 
     htmlEditorController.setText(currentContent);
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -307,94 +308,109 @@ class _PrescriptionInfoScreenState extends State<PrescriptionInfoScreen> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(5.0)),
       ),
-      backgroundColor: Color(0xFFFFF8E1),
       builder: (context) => SafeArea(
-        child: Padding(
-          padding: EdgeInsets.only(
-            top: MediaQuery.of(context).padding.top,
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                height: MediaQuery.of(context).size.height * 0.5,
-                width: double.infinity,
-                child: HtmlEditor(
-                  controller: htmlEditorController,
-                  htmlEditorOptions: HtmlEditorOptions(
-                    hint: "Type your content below...",
-                    autoAdjustHeight: true,
-                    initialText: currentContent,
-                    shouldEnsureVisible: true,
-                  ),
-                  htmlToolbarOptions: HtmlToolbarOptions(
-                    toolbarPosition: ToolbarPosition.belowEditor,
-                    defaultToolbarButtons: [
-                      FontSettingButtons(
-                        fontName: false,
-                        fontSize: true,
-                        fontSizeUnit: false,
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Editor Area
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.5,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: HtmlEditor(
+                      controller: htmlEditorController,
+                      htmlEditorOptions: HtmlEditorOptions(
+                        hint: "Type your content here...",
+                        shouldEnsureVisible: true,
+                        initialText: currentContent,
                       ),
-                      FontButtons(
-                          bold: true,
-                          italic: true,
-                          underline: true,
-                          clearAll: false,
-                          superscript: false,
-                          subscript: false),
-                    ],
-                  ),
-                ),
-              ),
-              // Save Button
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  onPressed: () async {
-                    String? content = await htmlEditorController.getText();
-                    if (content.isNotEmpty) {
-                      setState(() {
-                        if (boxNumber == 1) {
-                          patientInfo = content;
-                        } else if (boxNumber == 2) {
-                          doctorInfo = content;
-                        } else if (boxNumber == 3) {
-                          otherDetailsInfo = content;
-                        }
-                      });
-                      Navigator.pop(context); // Close the bottom sheet
-                    }
-                  },
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.save, color: Colors.white),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Save',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
+                      htmlToolbarOptions: HtmlToolbarOptions(
+                        toolbarPosition: ToolbarPosition.belowEditor,
+                        defaultToolbarButtons: [
+                          FontSettingButtons(
+                            fontName: false,
+                            fontSize: true,
+                            fontSizeUnit: false,
+                          ),
+                          FontButtons(
+                            bold: true,
+                            italic: true,
+                            underline: true,
+                            clearAll: false,
+                          ),
+                        ],
+                      ),
+                      otherOptions: OtherOptions(
+                        height: MediaQuery.of(context).size.height * 0.5,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey),
+                          borderRadius: BorderRadius.circular(5),
+                          color: Color(0xFFFFF8E1).withOpacity(.7),
                         ),
                       ),
-                    ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+
+                // Save Button
+                Flexible(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: Container(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue,
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        onPressed: () async {
+                          String? content = await htmlEditorController.getText();
+                          if (content.isNotEmpty) {
+                            setState(() {
+                              if (boxNumber == 1) {
+                                patientInfo = content;
+                              } else if (boxNumber == 2) {
+                                doctorInfo = content;
+                              } else if (boxNumber == 3) {
+                                otherDetailsInfo = content;
+                              }
+                            });
+                            Navigator.pop(context); // Close the bottom sheet
+                          }
+                        },
+                        icon: const Icon(Icons.save, color: Colors.white),
+                        label: const Text(
+                          'Save',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
   }
 
   @override
@@ -482,7 +498,7 @@ class _PrescriptionInfoScreenState extends State<PrescriptionInfoScreen> {
                 Divider(thickness: 2),
                 Container(
                   width: width,
-                  height: height * 0.1,
+                  //height: height * 0.1,
                   decoration: BoxDecoration(border: Border.all(width: 1, color: Colors.black12)),
                   child: TextButton(
                     onPressed: () => _showEdit(context, 1),

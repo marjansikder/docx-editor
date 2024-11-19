@@ -28,10 +28,13 @@ dependencies:
   file_picker: ^8.1.4
   google_fonts: ^6.2.1
   html_editor_enhanced: ^2.6.0
+  #html_editor_enhanced_android_fix: ^1.0.0+3
+  #html_editor_plus: ^0.0.5
   htmltopdfwidgets: ^1.0.4
   html_to_pdf: ^0.8.1
   flutter_widget_from_html: ^0.15.3
   uuid: ^4.5.1
+  flutter_inappwebview: ^6.1.5
 
 
 
