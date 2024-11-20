@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:docx/utils/custom_text_wdget.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
@@ -291,11 +293,11 @@ class _PrescriptionInfoScreenState extends State<PrescriptionInfoScreen> {
     String currentContent = "";
 
     // Determine the content to load based on the box number
-    if (boxNumber == 1) {
+    if (boxNumber == 3) {
       currentContent = patientInfo;
-    } else if (boxNumber == 2) {
+    } else if (boxNumber == 1) {
       currentContent = doctorInfo;
-    } else if (boxNumber == 3) {
+    } else if (boxNumber == 2) {
       currentContent = otherDetailsInfo;
     }
 
@@ -325,34 +327,110 @@ class _PrescriptionInfoScreenState extends State<PrescriptionInfoScreen> {
                     child: HtmlEditor(
                       controller: htmlEditorController,
                       htmlEditorOptions: HtmlEditorOptions(
-                        hint: "Type your content here...",
-                        shouldEnsureVisible: true,
-                        initialText: currentContent,
-                      ),
+                          hint: 'Your text here...', shouldEnsureVisible: true, initialText: currentContent
+                          //initialText: "<p>text content initial, if any</p>",
+                          ),
                       htmlToolbarOptions: HtmlToolbarOptions(
                         toolbarPosition: ToolbarPosition.belowEditor,
+                        toolbarType: ToolbarType.nativeScrollable,
                         defaultToolbarButtons: [
+                          StyleButtons(),
+                          FontButtons(
+                              bold: true,
+                              italic: true,
+                              underline: true,
+                              clearAll: false,
+                              superscript: false,
+                              subscript: false),
                           FontSettingButtons(
                             fontName: false,
                             fontSize: true,
                             fontSizeUnit: false,
                           ),
-                          FontButtons(
-                            bold: true,
-                            italic: true,
-                            underline: true,
-                            clearAll: false,
-                          ),
+                          ParagraphButtons(
+                              lineHeight: true,
+                              caseConverter: false,
+                              increaseIndent: false,
+                              decreaseIndent: false,
+                              textDirection: false)
                         ],
+                        onButtonPressed: (ButtonType type, bool? status, Function? updateStatus) {
+                          print("button '${describeEnum(type)}' pressed, the current selected status is $status");
+                          return true;
+                        },
+                        onDropdownChanged: (DropdownType type, dynamic changed, Function(dynamic)? updateSelectedItem) {
+                          print("dropdown '${describeEnum(type)}' changed to $changed");
+                          return true;
+                        },
+                        mediaLinkInsertInterceptor: (String url, InsertFileType type) {
+                          print(url);
+                          return true;
+                        },
+                        mediaUploadInterceptor: (PlatformFile file, InsertFileType type) async {
+                          print(file.name);
+                          print(file.size);
+                          print(file.extension);
+                          return true;
+                        },
                       ),
-                      otherOptions: OtherOptions(
-                        height: MediaQuery.of(context).size.height * 0.5,
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey),
-                          borderRadius: BorderRadius.circular(5),
-                          color: Color(0xFFFFF8E1).withOpacity(.7),
-                        ),
-                      ),
+                      otherOptions: OtherOptions(height: 550),
+                      callbacks: Callbacks(onBeforeCommand: (String? currentHtml) {
+                        print('html before change is $currentHtml');
+                      }, onChangeContent: (String? changed) {
+                        print('content changed to $changed');
+                      }, onChangeCodeview: (String? changed) {
+                        print('code changed to $changed');
+                      }, onChangeSelection: (EditorSettings settings) {
+                        print('parent element is ${settings.parentElement}');
+                        print('font name is ${settings.fontName}');
+                      }, onDialogShown: () {
+                        print('dialog shown');
+                      }, onEnter: () {
+                        print('enter/return pressed');
+                      }, onFocus: () {
+                        print('editor focused');
+                      }, onBlur: () {
+                        print('editor unfocused');
+                      }, onBlurCodeview: () {
+                        print('codeview either focused or unfocused');
+                      }, onInit: () {
+                        print('init');
+                      }, onImageUploadError: (FileUpload? file, String? base64Str, UploadError error) {
+                        print(describeEnum(error));
+                        print(base64Str ?? '');
+                        if (file != null) {
+                          print(file.name);
+                          print(file.size);
+                          print(file.type);
+                        }
+                      }, onKeyDown: (int? keyCode) {
+                        print('$keyCode key downed');
+                        print('current character count: ${htmlEditorController.characterCount}');
+                      }, onKeyUp: (int? keyCode) {
+                        print('$keyCode key released');
+                      }, onMouseDown: () {
+                        print('mouse downed');
+                      }, onMouseUp: () {
+                        print('mouse released');
+                      }, onNavigationRequestMobile: (String url) {
+                        print(url);
+                        return NavigationActionPolicy.ALLOW;
+                      }, onPaste: () {
+                        print('pasted into editor');
+                      }, onScroll: () {
+                        print('editor scrolled');
+                      }),
+                      plugins: [
+                        SummernoteAtMention(
+                            getSuggestionsMobile: (String value) {
+                              var mentions = <String>['test1', 'test2', 'test3'];
+                              return mentions.where((element) => element.contains(value)).toList();
+                            },
+                            mentionsWeb: ['test1', 'test2', 'test3'],
+                            onSelect: (String value) {
+                              print(value);
+                            }),
+                      ],
                     ),
                   ),
                 ),
@@ -375,11 +453,11 @@ class _PrescriptionInfoScreenState extends State<PrescriptionInfoScreen> {
                           String? content = await htmlEditorController.getText();
                           if (content.isNotEmpty) {
                             setState(() {
-                              if (boxNumber == 1) {
+                              if (boxNumber == 3) {
                                 patientInfo = content;
-                              } else if (boxNumber == 2) {
+                              } else if (boxNumber == 1) {
                                 doctorInfo = content;
-                              } else if (boxNumber == 3) {
+                              } else if (boxNumber == 2) {
                                 otherDetailsInfo = content;
                               }
                             });
@@ -442,7 +520,7 @@ class _PrescriptionInfoScreenState extends State<PrescriptionInfoScreen> {
         ],
         title: const Text(
           'Prescription',
-          style: TextStyle(fontFamily: 'Noto Sans', fontSize: 24.5, fontWeight: FontWeight.w900, color: Colors.white),
+          style: TextStyle(fontFamily: 'NotoSans', fontSize: 24.5, fontWeight: FontWeight.w900, color: Colors.white),
         ),
       ),
       body: Container(
@@ -468,7 +546,7 @@ class _PrescriptionInfoScreenState extends State<PrescriptionInfoScreen> {
                           //bottom: BorderSide(color: Colors.black45, width: .5),
                         )),
                         child: TextButton(
-                          onPressed: () => _showEdit(context, 2),
+                          onPressed: () => _showEdit(context, 1),
                           child: doctorInfo.isEmpty ? Text('+ Add Doctor Information') : HtmlWidget(doctorInfo),
                         ),
                       ),
@@ -486,7 +564,7 @@ class _PrescriptionInfoScreenState extends State<PrescriptionInfoScreen> {
                           //bottom: BorderSide(color: Colors.black45, width: .5),
                         )),
                         child: TextButton(
-                          onPressed: () => _showEdit(context, 3),
+                          onPressed: () => _showEdit(context, 2),
                           child:
                               otherDetailsInfo.isEmpty ? Text('+ Add Other Information') : HtmlWidget(otherDetailsInfo),
                         ),
@@ -501,7 +579,7 @@ class _PrescriptionInfoScreenState extends State<PrescriptionInfoScreen> {
                   //height: height * 0.1,
                   decoration: BoxDecoration(border: Border.all(width: 1, color: Colors.black12)),
                   child: TextButton(
-                    onPressed: () => _showEdit(context, 1),
+                    onPressed: () => _showEdit(context, 3),
                     child: patientInfo.isEmpty ? Text('+ Add Patient Information') : HtmlWidget(patientInfo),
                   ),
                 ),
@@ -582,7 +660,8 @@ class _PrescriptionInfoScreenState extends State<PrescriptionInfoScreen> {
                       ),
                     ),
                   ],
-                )
+                ),
+                SizedBox(height: 5),
               ],
             ),
           ),

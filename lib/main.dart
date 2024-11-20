@@ -1,4 +1,4 @@
-import 'package:docx/screen/other_practise/package_html.dart';
+import 'package:docx/screen/prescription/prescription_info.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -19,7 +19,8 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
         fontFamily: 'Jost',
       ),
-      home: HtmlEditorExample(title: 'Flutter HTML Editor Example'),
+      home: PrescriptionInfoScreen(),
+      //home: HtmlEditorExample(title: 'Flutter HTML Editor Example'),
     );
   }
 }
