@@ -1,6 +1,9 @@
 import 'dart:io';
+import 'dart:math';
 
+import 'package:docx/utils/colors.dart';
 import 'package:docx/utils/custom_text_wdget.dart';
+import 'package:docx/utils/toast.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +13,7 @@ import 'package:html_editor_enhanced/html_editor.dart';
 import 'package:html_to_pdf/html_to_pdf.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
+import 'package:pdf_render/pdf_render_widgets.dart';
 import 'package:printing/printing.dart';
 
 class PrescriptionInfoScreen extends StatefulWidget {
@@ -204,12 +208,12 @@ class _PrescriptionInfoScreenState extends State<PrescriptionInfoScreen> {
         <div class="row">
             <!-- First Left Box -->
             <div class="details-box">
-              <p>${otherDetailsInfo}</p>
+              <p>${doctorInfo}</p>
             </div>
             <div class="middle-border"></div>
             <!-- Second Right Box -->
             <div class="details-box">
-                <p>${doctorInfo}</p>
+                <p>${otherDetailsInfo}</p>
             </div>
         </div>
        
@@ -285,8 +289,40 @@ class _PrescriptionInfoScreenState extends State<PrescriptionInfoScreen> {
         printOrientation: PrintOrientation.Portrait,
       ),
     );
-
     return generatedPdfFile.readAsBytes();
+  }
+
+  Widget _buildPdfPreview(Uint8List pdfBytes) {
+    return Container(
+      color: AppColors.kBackgroundColor,
+      padding: const EdgeInsets.fromLTRB(4, 4, 4, 0),
+      child: PdfViewer.openData(
+        pdfBytes,
+        params: PdfViewerParams(
+          pageDecoration: const BoxDecoration(),
+          layoutPages: (viewSize, pages) {
+            List<Rect> rect = [];
+            final viewWidth = viewSize.width;
+            final viewHeight = viewSize.height;
+            final maxWidth = pages.fold<double>(0.0, (maxWidth, page) => max(maxWidth, page.width));
+            final ratio = viewWidth / maxWidth;
+            var top = 0.0;
+            for (var page in pages) {
+              final width = page.width * ratio;
+              final height = page.height * ratio;
+              final left = viewWidth > viewHeight ? (viewWidth / 2) - (width / 2) : 0.0;
+              rect.add(Rect.fromLTWH(left, top, width, height));
+              top += height + 8;
+            }
+            return rect;
+          },
+        ),
+      ),
+    );
+  }
+
+  void printRx(Uint8List data) async {
+    await Printing.layoutPdf(onLayout: (_) => data);
   }
 
   Future<void> _showEdit(BuildContext context, int boxNumber) async {
@@ -434,38 +470,70 @@ class _PrescriptionInfoScreenState extends State<PrescriptionInfoScreen> {
                     ),
                   ),
                 ),
-
-                // Save Button
-                Flexible(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    child: Container(
-                      width: double.infinity,
-                      child: ElevatedButton.icon(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
-                          padding: const EdgeInsets.symmetric(vertical: 10),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blueGrey,
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      onPressed: () {
+                        htmlEditorController.clear(); // Close the bottom sheet
+                      },
+                      icon: Padding(
+                        padding: const EdgeInsets.only(left: 15),
+                        child: const Icon(Icons.refresh, color: Colors.white),
+                      ),
+                      label: Padding(
+                        padding: const EdgeInsets.only(right: 20),
+                        child: const Text(
+                          'Reset',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
-                        onPressed: () async {
-                          String? content = await htmlEditorController.getText();
-                          if (content.isNotEmpty) {
-                            setState(() {
-                              if (boxNumber == 3) {
-                                patientInfo = content;
-                              } else if (boxNumber == 1) {
-                                doctorInfo = content;
-                              } else if (boxNumber == 2) {
-                                otherDetailsInfo = content;
-                              }
-                            });
-                            Navigator.pop(context); // Close the bottom sheet
-                          }
-                        },
-                        icon: const Icon(Icons.save, color: Colors.white),
-                        label: const Text(
+                      ),
+                    ),
+                    ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      onPressed: () async {
+                        String? content = await htmlEditorController.getText();
+                        if (content.trim().isNotEmpty) {
+                          setState(() {
+                            if (boxNumber == 3) {
+                              patientInfo = content;
+                            } else if (boxNumber == 1) {
+                              doctorInfo = content;
+                            } else if (boxNumber == 2) {
+                              otherDetailsInfo = content;
+                            }
+                          });
+                          Navigator.pop(context); // Close the bottom sheet or dialog
+                        } else {
+                          Toast.showErrorToast(
+                            "Empty field",
+                          );
+                        }
+                      },
+                      icon: Padding(
+                        padding: const EdgeInsets.only(left: 15),
+                        child: const Icon(Icons.save, color: Colors.white),
+                      ),
+                      label: Padding(
+                        padding: const EdgeInsets.only(right: 20),
+                        child: const Text(
                           'Save',
                           style: TextStyle(
                             color: Colors.white,
@@ -475,8 +543,78 @@ class _PrescriptionInfoScreenState extends State<PrescriptionInfoScreen> {
                         ),
                       ),
                     ),
-                  ),
-                ),
+                    /*Flexible(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        child: Container(
+                          width: double.infinity,
+                          child: ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.blue,
+                              padding: const EdgeInsets.symmetric(vertical: 10),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            onPressed: () {
+                              htmlEditorController.clear(); // Close the bottom sheet
+                            },
+                            icon: const Icon(Icons.refresh, color: Colors.white),
+                            label: const Text(
+                              'Reset',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Flexible(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        child: Container(
+                          width: double.infinity,
+                          child: ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.blue,
+                              padding: const EdgeInsets.symmetric(vertical: 10),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            onPressed: () async {
+                              String? content = await htmlEditorController.getText();
+                              if (content.isNotEmpty) {
+                                setState(() {
+                                  if (boxNumber == 3) {
+                                    patientInfo = content;
+                                  } else if (boxNumber == 1) {
+                                    doctorInfo = content;
+                                  } else if (boxNumber == 2) {
+                                    otherDetailsInfo = content;
+                                  }
+                                });
+                                Navigator.pop(context); // Close the bottom sheet
+                              }
+                            },
+                            icon: const Icon(Icons.save, color: Colors.white),
+                            label: const Text(
+                              'Save',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),*/
+                  ],
+                )
               ],
             ),
           ),
@@ -505,6 +643,7 @@ class _PrescriptionInfoScreenState extends State<PrescriptionInfoScreen> {
                 final pdfBytes = await _getPdf(patientInfo + doctorInfo + otherDetailsInfo);
                 if (pdfBytes != null) {
                   await Printing.layoutPdf(
+                    usePrinterSettings: false,
                     onLayout: (PdfPageFormat format) async => pdfBytes,
                   );
                 } else {
@@ -534,7 +673,6 @@ class _PrescriptionInfoScreenState extends State<PrescriptionInfoScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Box 2
                     Flexible(
                       child: Container(
                         width: width,
