@@ -4,7 +4,7 @@ import 'package:docx/screen/other_practise/prescription_format.dart';
 import 'package:docx/utils/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
+import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
 import 'package:html_to_pdf/html_to_pdf.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';

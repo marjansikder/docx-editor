@@ -1,3 +1,4 @@
+/*
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -110,7 +111,8 @@ class _HtmlEditorExampleState extends State<HtmlEditorExample> {
                   print('init');
                 },
                     //this is commented because it overrides the default Summernote handlers
-                    /*onImageLinkInsert: (String? url) {
+                    */
+/*onImageLinkInsert: (String? url) {
                     print(url ?? "unknown url");
                   },
                   onImageUpload: (FileUpload file) async {
@@ -118,7 +120,8 @@ class _HtmlEditorExampleState extends State<HtmlEditorExample> {
                     print(file.size);
                     print(file.type);
                     print(file.base64);
-                  },*/
+                  },*//*
+
                     onImageUploadError: (FileUpload? file, String? base64Str,
                         UploadError error) {
                       print(describeEnum(error));
@@ -437,4 +440,4 @@ class _HtmlEditorExampleState extends State<HtmlEditorExample> {
       ),
     );
   }
-}
+}*/
